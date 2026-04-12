@@ -319,6 +319,12 @@ function paymentPlanLabel(plan: PaymentPlan): string {
   return plan === "subscription" ? "Abonnement" : "Paiement unique";
 }
 
+const APEX_FIRM_NAME = "Apex Trader Funding";
+
+function apexOneTimeBillingNote(firm: PropFirm): boolean {
+  return firm.name === APEX_FIRM_NAME && firm.paymentPlan === "one_time";
+}
+
 function compareFirmsForSort(
   a: (typeof propFirms)[number],
   b: (typeof propFirms)[number],
@@ -1588,8 +1594,13 @@ export default function ComparePage() {
                         })()}
                       </div>
 
-                      <div className="flex items-center justify-center text-center text-[13px] text-white/70">
-                        {paymentPlanLabel(firm.paymentPlan)}
+                      <div className="flex flex-col items-center justify-center gap-1 text-center text-[13px] text-white/70">
+                        <span>{paymentPlanLabel(firm.paymentPlan)}</span>
+                        {apexOneTimeBillingNote(firm) ? (
+                          <span className="text-[11px] font-normal italic text-[color:var(--cmp-steel)]">
+                            Expire après un mois
+                          </span>
+                        ) : null}
                       </div>
 
                       <div className="flex flex-col items-center justify-center text-center text-[13px] tabular-nums leading-tight">

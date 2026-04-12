@@ -148,6 +148,12 @@ function paymentPlanLabel(plan: PaymentPlan): string {
   return plan === "subscription" ? "Abonnement" : "Paiement unique";
 }
 
+const APEX_FIRM_NAME = "Apex Trader Funding";
+
+function apexOneTimeBillingNote(firm: PropFirm): boolean {
+  return firm.name === APEX_FIRM_NAME && firm.paymentPlan === "one_time";
+}
+
 function accountTypeLabel(type: PropFirm["accountType"]): string {
   return type === "Eval" ? "Évaluation" : "Direct";
 }
@@ -537,7 +543,12 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
               <Label icon={i.card}>Facturation</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
-                  {paymentPlanLabel(firm.paymentPlan)}
+                  <span>{paymentPlanLabel(firm.paymentPlan)}</span>
+                  {apexOneTimeBillingNote(firm) ? (
+                    <span className="mt-1.5 text-[12px] font-normal italic text-[color:var(--cmp-steel)]">
+                      Expire après un mois
+                    </span>
+                  ) : null}
                 </div>
               ))}
             </CompareRow>
