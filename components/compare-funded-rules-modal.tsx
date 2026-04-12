@@ -6,15 +6,16 @@ import {
   RuleCell,
 } from "@/components/journal/apex-funded-rules-panel";
 import type { ApexEvalRulesLayout } from "@/lib/journal/apex-journal-rules";
+import { translateCompareFundedRulesCardToFr } from "@/lib/journal/compare-funded-rules-i18n";
 import { resolveCompareRowFundedRulesCard } from "@/lib/journal/compare-funded-rules-resolve";
 import { formatUsdWholeGrouped, type PropFirm } from "@/lib/prop-firms";
 import { handleModalEnterToSubmit } from "@/components/journal/modal-enter-submit";
 
 const MODAL_KICKER =
-  "text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-400/90";
+  "text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--cmp-mint)]";
 
 const PANEL_SHELL =
-  "relative overflow-hidden rounded-2xl border border-slate-600/25 bg-gradient-to-b from-slate-800/40 via-slate-900/45 to-slate-950/55 shadow-[0_16px_40px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.08)]";
+  "relative overflow-hidden rounded-2xl border border-[color:var(--cmp-sage-border)] bg-gradient-to-b from-[color:var(--cmp-ink-850)] via-[color:var(--cmp-ink-900)] to-[color:var(--cmp-ink-950)] shadow-[0_16px_40px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.06)]";
 
 function Panel({ className = "", children }: { className?: string; children: React.ReactNode }) {
   return (
@@ -135,6 +136,7 @@ export function CompareFundedRulesModal({ open, firm, onClose }: Props) {
     () => (firm ? resolveCompareRowFundedRulesCard(firm) : null),
     [firm]
   );
+  const cardFr = useMemo(() => translateCompareFundedRulesCardToFr(card), [card]);
 
   if (!mounted || !open || !firm) return null;
 
@@ -142,79 +144,82 @@ export function CompareFundedRulesModal({ open, firm, onClose }: Props) {
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4">
       <button
         type="button"
-        aria-label="Close funded rules"
-        className="absolute inset-0 bg-black/60 backdrop-blur-xl backdrop-saturate-150"
+        aria-label="Fermer les règles financées"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="compare-funded-rules-title"
-        className="relative z-10 flex max-h-[min(92dvh,880px)] w-[min(720px,calc(100vw-1rem))] flex-col overflow-hidden rounded-2xl border border-slate-600/25 bg-gradient-to-b from-[#0a0c10] via-[#080a0e] to-[#06080c] shadow-[0_16px_48px_rgba(0,0,0,0.55)] ring-1 ring-white/[0.06]"
+        className="relative z-10 flex max-h-[min(92dvh,880px)] w-[min(720px,calc(100vw-1rem))] flex-col overflow-hidden rounded-2xl border border-[color:var(--cmp-sage-border)] bg-gradient-to-b from-[color:var(--cmp-ink-900)] via-[color:var(--cmp-ink-950)] to-[#100a0d] shadow-[0_16px_48px_rgba(0,0,0,0.55)] ring-1 ring-[color:var(--cmp-sage-border)]/35"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => handleModalEnterToSubmit(e, onClose, false)}
       >
-        <header className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-600/20 bg-slate-950/35 px-5 py-4">
+        <header className="flex shrink-0 items-start justify-between gap-3 border-b border-[color:var(--cmp-sage-border)]/50 bg-[color:var(--cmp-ink-850)]/60 px-5 py-4">
           <div className="min-w-0">
-            <p className={MODAL_KICKER}>Funded rules</p>
+            <p className={MODAL_KICKER}>Règles du compte financé</p>
             <h2
               id="compare-funded-rules-title"
               className="mt-2 truncate text-lg font-semibold tracking-tight text-white sm:text-xl"
             >
               {firm.accountName}
             </h2>
-            <p className="mt-1 truncate text-sm text-slate-500">
+            <p className="mt-1 truncate text-sm text-[color:var(--cmp-steel)]">
               {firm.name} · {firm.size}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/12 text-xl leading-none text-slate-400 transition hover:border-sky-500/35 hover:bg-sky-500/10 hover:text-white"
-            aria-label="Close"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/12 text-xl leading-none text-[color:var(--cmp-steel)] transition hover:border-[color:var(--cmp-sage-strong)] hover:bg-[color:var(--cmp-sage-soft)] hover:text-[color:var(--foreground)]"
+            aria-label="Fermer"
           >
             ×
           </button>
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-5 pt-4 [scrollbar-color:rgba(255,255,255,0.12)_transparent] [scrollbar-width:thin]">
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-400/90">
-            Rules
+          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--cmp-mint)]">
+            Règles
           </p>
           <Panel className="p-4">
             <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-              {card?.phase === "funded" ? (
-                <ApexFundedRulesSection layout={card.fundedLayout} />
-              ) : card?.phase === "eval" ? (
+              {cardFr?.phase === "funded" ? (
+                <ApexFundedRulesSection layout={cardFr.fundedLayout} />
+              ) : cardFr?.phase === "eval" ? (
                 <>
-                  <p className="col-span-full mb-1 text-xs text-slate-500">
-                    No separate funded sheet for this program in the journal — showing evaluation
-                    rules for reference.
+                  <p className="col-span-full mb-1 text-xs text-[color:var(--cmp-steel)]">
+                    Aucune fiche « funded » distincte pour ce programme dans le journal — affichage
+                    des règles d’évaluation à titre indicatif.
                   </p>
-                  <ApexEvalRulesSection layout={card.evalLayout} />
+                  <ApexEvalRulesSection layout={cardFr.evalLayout} />
                 </>
               ) : (
                 <>
-                  <RuleCell label="Daily loss limit" value={firm.rules.dailyLossLimit} />
+                  <RuleCell
+                    label="Perte journalière max."
+                    value={firm.rules.dailyLossLimit}
+                  />
                   <RuleCell label="Sizing" value={firm.rules.sizing} multiline />
                   <RuleCell
-                    label="Consistency"
+                    label="Consistance"
                     value={normalizeConsistency(firm.rules.consistency)}
                   />
-                  <RuleCell label="Minimum days" value={firm.rules.minDays} />
+                  <RuleCell label="Jours minimum" value={firm.rules.minDays} />
                   <RuleCell label="Scalping" value={firm.rules.scalping} />
-                  <RuleCell label="Max accounts" value={firm.rules.maxAccounts} />
+                  <RuleCell label="Comptes max." value={firm.rules.maxAccounts} />
                   <RuleCell
-                    label="Max drawdown"
+                    label="Drawdown maximum"
                     value={formatUsdWholeGrouped(firm.maxDrawdownLimitUsd)}
                   />
                   <RuleCell
-                    label="Drawdown type"
+                    label="Type de drawdown"
                     value={formatDrawdownFromCompare(firm.drawdown)}
                   />
                   <RuleCell
                     label="Note"
-                    value="Detailed funded rules for this firm are not wired in the journal yet."
+                    value="Les règles funded détaillées pour cette firme ne sont pas encore branchées dans le journal."
                     multiline
                   />
                 </>

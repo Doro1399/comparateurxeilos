@@ -6,33 +6,40 @@
 }
 
 /**
- * Route /compare — palette sobre « encre / sauge » (évite le duo slate + sky générique).
- * Les utilitaires Tailwind peuvent référencer ces variables avec border-[color:var(--cmp-…)] etc.
+ * Route /compare — nuances de rouge (bordeaux, rose brûlé) et de blanc cassé, sobres.
+ * Les noms --cmp-sage-* sont conservés pour le code existant ; ils portent désormais du rouge atténué.
  */
 html.compare-light {
-  --background: #0f1413;
-  --foreground: #e7ece9;
-  --cmp-ink-950: #0a0f0e;
-  --cmp-ink-900: #101917;
-  --cmp-ink-850: #131f1d;
-  --cmp-ink-800: #162522;
-  --cmp-surface: rgba(20, 32, 29, 0.78);
-  --cmp-row-a: rgba(24, 36, 33, 0.68);
-  --cmp-row-b: rgba(17, 28, 26, 0.75);
-  --cmp-header: #1a2e2a;
-  --cmp-sage: #7d9e94;
-  --cmp-sage-soft: rgba(125, 158, 148, 0.14);
-  --cmp-sage-softer: rgba(125, 158, 148, 0.09);
-  --cmp-sage-border: rgba(125, 158, 148, 0.26);
-  --cmp-sage-strong: rgba(125, 158, 148, 0.42);
-  --cmp-sage-glow: rgba(125, 158, 148, 0.12);
-  --cmp-mist: rgba(186, 206, 198, 0.88);
-  --cmp-steel: #7a8b85;
-  --cmp-mint: #8ebfb0;
-  --cmp-mint-dim: rgba(142, 191, 176, 0.92);
-  --cmp-dusk-line: rgba(148, 138, 158, 0.3);
-  --cmp-dusk-fill: rgba(96, 88, 108, 0.14);
-  --cmp-dusk-text: #c8c0d0;
+  /* Fond relevé : gris-bordeaux doux, pas blanc agressif */
+  --background: #1c1619;
+  --foreground: #f7f1f2;
+  --cmp-ink-950: #141011;
+  --cmp-ink-900: #1a1417;
+  --cmp-ink-850: #201a1d;
+  --cmp-ink-800: #261f22;
+  --cmp-nav-surface: rgba(40, 32, 36, 0.94);
+  --cmp-surface: rgba(48, 38, 42, 0.78);
+  --cmp-row-a: rgba(52, 42, 46, 0.72);
+  --cmp-row-b: rgba(44, 36, 40, 0.78);
+  --cmp-header: #3d2a30;
+  --cmp-sage: #d0707c;
+  --cmp-sage-soft: rgba(208, 112, 124, 0.16);
+  --cmp-sage-softer: rgba(208, 112, 124, 0.1);
+  --cmp-sage-border: rgba(230, 200, 204, 0.22);
+  --cmp-sage-strong: rgba(228, 185, 192, 0.38);
+  --cmp-sage-glow: rgba(190, 60, 74, 0.1);
+  --cmp-mist: rgba(255, 244, 245, 0.9);
+  --cmp-steel: #b5989f;
+  --cmp-mint: #f0b4ba;
+  --cmp-mint-dim: rgba(240, 180, 186, 0.95);
+  --cmp-dusk-line: rgba(232, 175, 182, 0.3);
+  --cmp-dusk-fill: rgba(120, 40, 52, 0.18);
+  --cmp-dusk-text: #f0dedf;
+  --cmp-ring: rgba(236, 168, 176, 0.34);
+  --cmp-orb: rgba(200, 90, 102, 0.11);
+  --cmp-compare-active-bg: rgba(198, 70, 82, 0.15);
+  --cmp-compare-active-border: rgba(240, 175, 184, 0.46);
+  --cmp-hover-mid: rgba(210, 88, 100, 0.24);
 }
 
 body {

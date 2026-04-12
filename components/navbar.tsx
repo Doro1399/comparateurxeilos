@@ -11,7 +11,7 @@ export default function Navbar({ theme = "dark" }: NavbarProps) {
   const header = sheet
     ? "sticky top-0 z-50 w-full border-b border-slate-200/90 bg-white/95 backdrop-blur-xl shadow-sm"
     : petrol
-      ? "sticky top-0 z-50 w-full border-b border-[color:rgba(125,158,148,0.28)] bg-[color:rgba(16,22,21,0.92)] backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+      ? "sticky top-0 z-50 w-full border-b border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-nav-surface)] backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
       : "sticky top-0 z-50 w-full border-b border-white/10 bg-[#0a0f18]/88 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
   const title = sheet
     ? "text-2xl font-semibold tracking-[-0.03em] text-slate-900"
@@ -26,7 +26,7 @@ export default function Navbar({ theme = "dark" }: NavbarProps) {
   const cta = sheet
     ? "rounded-xl border border-blue-700/20 bg-gradient-to-b from-blue-700 to-blue-800 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:from-blue-600 hover:to-blue-700"
     : petrol
-      ? "rounded-xl border border-[color:rgba(157,188,178,0.38)] bg-gradient-to-b from-[#2c3b36] to-[#1c2825] px-5 py-2.5 text-sm font-semibold text-[#eef4f1] shadow-md transition hover:from-[#354a42] hover:to-[#24332f]"
+      ? "rounded-xl border border-[color:var(--cmp-sage-strong)] bg-gradient-to-b from-[#4a2830] to-[#2e181e] px-5 py-2.5 text-sm font-semibold text-[#fff8f8] shadow-md transition hover:from-[#563038] hover:to-[#3a1f26]"
       : "rounded-xl border border-white/15 bg-gradient-to-b from-white to-white/90 px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_4px_20px_rgba(0,0,0,0.25)] transition hover:border-sky-400/40 hover:from-sky-50 hover:to-white";
 
   return (

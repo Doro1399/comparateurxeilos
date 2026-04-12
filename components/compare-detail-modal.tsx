@@ -42,25 +42,28 @@ function normalizeConsistency(value: string): string {
   return value;
 }
 
-/** Label / value — slate discret, aligné Dashboard / Account. */
+/** Label / valeur — thème compare (bordeaux / --cmp-*). */
 const labelCardClass =
-  "flex min-h-[52px] items-center gap-2.5 rounded-xl border border-white/10 bg-black/25 px-3 py-2.5 shadow-sm shadow-black/10 transition-[border-color,background-color] duration-200 group-hover/compare-row:border-sky-500/30 group-hover/compare-row:bg-black/35";
+  "flex min-h-[52px] items-center gap-2.5 rounded-xl border border-[color:var(--cmp-sage-border)]/50 bg-[color:var(--cmp-ink-900)]/55 px-3 py-2.5 shadow-sm shadow-black/15 transition-[border-color,background-color] duration-200 group-hover/compare-row:border-[color:var(--cmp-sage-strong)] group-hover/compare-row:bg-[color:var(--cmp-ink-850)]/65";
 
 const valueCardClass =
-  "flex min-h-[52px] min-w-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-black/25 px-3 py-2.5 text-center text-[13px] leading-snug text-white/85 shadow-sm shadow-black/10 transition-[border-color,background-color] duration-200 group-hover/compare-row:border-sky-500/25 group-hover/compare-row:bg-black/32";
+  "flex min-h-[52px] min-w-0 flex-col items-center justify-center rounded-xl border border-[color:var(--cmp-sage-border)]/50 bg-[color:var(--cmp-ink-900)]/55 px-3 py-2.5 text-center text-[13px] leading-snug text-white/85 shadow-sm shadow-black/15 transition-[border-color,background-color] duration-200 group-hover/compare-row:border-[color:var(--cmp-sage-strong)] group-hover/compare-row:bg-[color:var(--cmp-ink-850)]/60";
 
 const promoPillClass =
-  "rounded-lg border border-white/12 bg-white/[0.05] px-2.5 py-1 text-[12px] font-semibold uppercase tracking-wide text-white/82";
+  "rounded-lg border border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-sage-softer)] px-2.5 py-1 text-[12px] font-semibold uppercase tracking-wide text-[color:var(--foreground)]";
 
 const MODAL_KICKER =
-  "text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-400/90";
+  "text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--cmp-mint)]";
 
 /** Exit animation length + buffer — safety unmount if `animationend` is missed */
 const MODAL_EXIT_UNMOUNT_MS = 460;
 
 function RowIcon({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex h-[18px] w-[18px] shrink-0 text-sky-400/75" aria-hidden>
+    <span
+      className="inline-flex h-[18px] w-[18px] shrink-0 text-[color:var(--cmp-mint)]/85"
+      aria-hidden
+    >
       {children}
     </span>
   );
@@ -103,35 +106,36 @@ function CompareRow({
 function scoreRingConfig(score: number) {
   const clamped = Math.max(0, Math.min(10, score));
   const filledAngle = (clamped / 10) * 360;
+  const trackColor = "rgba(42, 34, 38, 0.78)";
   if (score >= 8) {
     return {
       filledAngle,
-      fillColor: "rgba(16,185,129,0.9)",
-      trackColor: "rgba(39,39,42,0.55)",
-      innerClass: "bg-black text-emerald-300",
+      fillColor: "rgba(208, 112, 124, 0.92)",
+      trackColor,
+      innerClass: "bg-[#120a0d] text-[color:var(--cmp-mint)]",
     } as const;
   }
   if (score >= 7) {
     return {
       filledAngle,
-      fillColor: "rgba(245,158,11,0.95)",
-      trackColor: "rgba(39,39,42,0.55)",
-      innerClass: "bg-black text-amber-300",
+      fillColor: "rgba(245, 180, 140, 0.9)",
+      trackColor,
+      innerClass: "bg-[#120a0d] text-amber-200/95",
     } as const;
   }
   if (score >= 4) {
     return {
       filledAngle,
-      fillColor: "rgba(249,115,22,0.95)",
-      trackColor: "rgba(39,39,42,0.55)",
-      innerClass: "bg-black text-orange-300",
+      fillColor: "rgba(232, 140, 100, 0.9)",
+      trackColor,
+      innerClass: "bg-[#120a0d] text-orange-200/95",
     } as const;
   }
   return {
     filledAngle,
-    fillColor: "rgba(239,68,68,0.95)",
-    trackColor: "rgba(39,39,42,0.55)",
-    innerClass: "bg-black text-red-300",
+    fillColor: "rgba(200, 80, 95, 0.95)",
+    trackColor,
+    innerClass: "bg-[#120a0d] text-red-200/95",
   } as const;
 }
 
@@ -141,11 +145,24 @@ function calcDiscountPct(regular: number, discounted: number): number {
 }
 
 function paymentPlanLabel(plan: PaymentPlan): string {
-  return plan === "subscription" ? "Subscription" : "One-time payment";
+  return plan === "subscription" ? "Abonnement" : "Paiement unique";
 }
 
 function accountTypeLabel(type: PropFirm["accountType"]): string {
-  return type === "Eval" ? "Evaluation" : "Direct";
+  return type === "Eval" ? "Évaluation" : "Direct";
+}
+
+function scalpingUiLabel(s: string): string {
+  const t = s.trim();
+  if (/^allowed$/i.test(t)) return "Autorisé";
+  if (/^not allowed$/i.test(t)) return "Interdit";
+  return s;
+}
+
+function dailyLossUiLabel(s: string): string {
+  const t = s.trim();
+  if (t === "None" || /^n\/?a$/i.test(t)) return "Aucune";
+  return s;
 }
 
 function splitRoundTripLines<T>(items: T[]): T[][] {
@@ -167,7 +184,7 @@ function RoundTripItem({
   const label = platformLabels[platform];
   return (
     <div className="flex shrink-0 items-center gap-1.5">
-      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-slate-600/30 bg-black/40 p-px shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[color:var(--cmp-sage-border)]/60 bg-black/35 p-px shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         {src ? (
           <Image
             src={src}
@@ -227,7 +244,7 @@ function ModalRoundTrip({ firm }: { firm: PropFirm }) {
     );
   }
   return (
-    <p className="whitespace-pre-line text-[12px] leading-snug text-slate-400">
+    <p className="whitespace-pre-line text-[12px] leading-snug text-[color:var(--cmp-steel)]">
       {firm.roundTripMnqNq}
     </p>
   );
@@ -265,7 +282,7 @@ function HeaderCard({ firm }: { firm: PropFirm }) {
             className="h-9 w-9 object-cover"
           />
         ) : (
-          <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-500/30 to-amber-700/20 text-[10px] font-bold text-amber-100">
+          <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-rose-700/35 to-rose-950/40 text-[10px] font-bold text-rose-100/95">
             {initial}
           </span>
         )}
@@ -274,7 +291,7 @@ function HeaderCard({ firm }: { firm: PropFirm }) {
         {firm.name}
       </p>
       <p
-        className="w-full truncate text-[12px] leading-snug text-slate-500"
+        className="w-full truncate text-[12px] leading-snug text-[color:var(--cmp-steel)]"
         title={firm.accountName}
       >
         {firm.accountName}
@@ -452,34 +469,34 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
       <button
         type="button"
-        aria-label="Close comparison"
-        className={`absolute inset-0 bg-black/60 backdrop-blur-xl backdrop-saturate-150 ${backdropAnim}`}
+        aria-label="Fermer la comparaison"
+        className={`absolute inset-0 bg-black/60 backdrop-blur-sm ${backdropAnim}`}
         onClick={onClose}
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="compare-detail-title"
-        className={`relative z-10 flex max-h-[calc(100dvh-1rem)] w-[min(1360px,calc(100vw-1rem))] flex-col overflow-hidden rounded-2xl border border-slate-600/25 bg-gradient-to-b from-[#0a0c10] via-[#080a0e] to-[#06080c] shadow-[0_16px_48px_rgba(0,0,0,0.55)] ring-1 ring-white/[0.06] [will-change:transform,opacity] ${panelAnim}`}
+        className={`relative z-10 flex max-h-[calc(100dvh-1rem)] w-[min(1360px,calc(100vw-1rem))] flex-col overflow-hidden rounded-2xl border border-[color:var(--cmp-sage-border)] bg-gradient-to-b from-[color:var(--cmp-ink-900)] via-[color:var(--cmp-ink-950)] to-[#100a0d] shadow-[0_16px_48px_rgba(0,0,0,0.55)] ring-1 ring-[color:var(--cmp-sage-border)]/35 [will-change:transform,opacity] ${panelAnim}`}
         onClick={(e) => e.stopPropagation()}
         onAnimationEnd={onPanelAnimationEnd}
         onKeyDown={(e) => handleModalEnterToSubmit(e, onClose, false)}
       >
-        <header className="flex shrink-0 items-center justify-between border-b border-slate-600/20 bg-slate-950/35 px-5 py-4">
+        <header className="flex shrink-0 items-center justify-between border-b border-[color:var(--cmp-sage-border)]/50 bg-[color:var(--cmp-ink-850)]/60 px-5 py-4">
           <div className="min-w-0">
-            <p className={MODAL_KICKER}>Comparator</p>
+            <p className={MODAL_KICKER}>Comparateur</p>
             <h2
               id="compare-detail-title"
               className="mt-2 text-lg font-semibold tracking-tight text-white sm:text-xl"
             >
-              Detailed comparison
+              Comparaison détaillée
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/12 text-xl leading-none text-slate-400 transition hover:border-sky-500/35 hover:bg-sky-500/10 hover:text-white"
-            aria-label="Close"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/12 text-xl leading-none text-[color:var(--cmp-steel)] transition hover:border-[color:var(--cmp-sage-strong)] hover:bg-[color:var(--cmp-sage-soft)] hover:text-[color:var(--foreground)]"
+            aria-label="Fermer"
           >
             ×
           </button>
@@ -499,7 +516,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
 
           <div className="flex flex-col gap-2">
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.size}>Size</Label>
+              <Label icon={i.size}>Taille</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
                   <span className="tabular-nums">{firm.size}</span>
@@ -517,7 +534,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.card}>Billing</Label>
+              <Label icon={i.card}>Facturation</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
                   {paymentPlanLabel(firm.paymentPlan)}
@@ -526,19 +543,19 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.dollar}>Price</Label>
+              <Label icon={i.dollar}>Prix</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
                   {firm.discountedPrice != null &&
                   firm.discountedPrice < firm.regularPrice ? (
                     <div className="flex max-w-full flex-nowrap items-center justify-center gap-2 overflow-x-auto">
-                      <span className="shrink-0 font-semibold whitespace-nowrap text-emerald-300/95">
+                      <span className="shrink-0 font-semibold whitespace-nowrap text-[color:var(--cmp-mint-dim)]">
                         {formatUsdCompact(firm.discountedPrice)}
                       </span>
-                      <span className="shrink-0 whitespace-nowrap text-[12px] text-slate-500 line-through">
+                      <span className="shrink-0 whitespace-nowrap text-[12px] text-[color:var(--cmp-steel)] line-through">
                         {formatUsdCompact(firm.regularPrice)}
                       </span>
-                      <span className="shrink-0 whitespace-nowrap text-[12px] text-slate-400">
+                      <span className="shrink-0 whitespace-nowrap text-[12px] text-[color:var(--cmp-mist)]/80">
                         −
                         {calcDiscountPct(firm.regularPrice, firm.discountedPrice)}
                         %
@@ -559,9 +576,11 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
                 <div key={firm.id} className={valueCardClass}>
                   {isActivationFree(firm) ? (
                     <>
-                      <span className="font-medium text-emerald-300/90">Free</span>
+                      <span className="font-medium text-[color:var(--cmp-mint-dim)]">
+                        Gratuit
+                      </span>
                       {firm.activationNote ? (
-                        <p className="mt-0.5 text-center text-[12px] text-emerald-300/75">
+                        <p className="mt-0.5 text-center text-[12px] text-[color:var(--cmp-mint)]/85">
                           {firm.activationNote}
                         </p>
                       ) : null}
@@ -576,7 +595,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.tag}>Promo code</Label>
+              <Label icon={i.tag}>Code promo</Label>
               {firms.map((firm) => {
                 const promo = comparePromoDisplay(firm);
                 return (
@@ -585,12 +604,12 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
                     <button
                       type="button"
                       onClick={() => onPromoCopy(promo)}
-                      className={`${promoPillClass} cursor-pointer transition hover:border-sky-500/30 hover:bg-sky-500/10 hover:text-white`}
+                      className={`${promoPillClass} cursor-pointer transition hover:border-[color:var(--cmp-sage-strong)] hover:bg-[color:var(--cmp-sage-soft)]`}
                     >
                       {promo}
                     </button>
                   ) : (
-                    <span className="text-slate-500">—</span>
+                    <span className="text-[color:var(--cmp-steel)]">—</span>
                   )}
                 </div>
                 );
@@ -598,7 +617,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.grid}>Data feed</Label>
+              <Label icon={i.grid}>Flux</Label>
               {firms.map((firm) => (
                 <div
                   key={firm.id}
@@ -624,7 +643,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.target}>Profit target</Label>
+              <Label icon={i.target}>Objectif de profit</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
                   {firm.target}
@@ -633,7 +652,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.chart}>Consistency</Label>
+              <Label icon={i.chart}>Consistance</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
                   {normalizeConsistency(firm.rules.consistency)}
@@ -642,7 +661,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.calendar}>Minimum days</Label>
+              <Label icon={i.calendar}>Jours minimum</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
                   {firm.rules.minDays}
@@ -651,10 +670,10 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.shield}>Daily loss limit</Label>
+              <Label icon={i.shield}>Perte journalière max.</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
-                  {firm.rules.dailyLossLimit}
+                  {dailyLossUiLabel(firm.rules.dailyLossLimit)}
                 </div>
               ))}
             </CompareRow>
@@ -663,9 +682,11 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
               <Label icon={i.activity}>Scalping</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
-                  <span className="text-emerald-300/90">{firm.rules.scalping}</span>
+                  <span className="text-[color:var(--cmp-mint-dim)]">
+                    {scalpingUiLabel(firm.rules.scalping)}
+                  </span>
                   {firm.rules.scalpingDetail ? (
-                    <p className="mt-0.5 text-center text-[12px] text-slate-500">
+                    <p className="mt-0.5 text-center text-[12px] text-[color:var(--cmp-steel)]">
                       {firm.rules.scalpingDetail}
                     </p>
                   ) : null}
@@ -685,7 +706,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.users}>Max accounts</Label>
+              <Label icon={i.users}>Comptes max.</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
                   {firm.rules.maxAccounts}
@@ -694,7 +715,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.license}>License</Label>
+              <Label icon={i.license}>Licence plateforme</Label>
               {firms.map((firm) => (
                 <div
                   key={firm.id}
@@ -721,7 +742,7 @@ export function CompareDetailModal({ open, onClose, firms, onPromoCopy }: Props)
             </CompareRow>
 
             <CompareRow gridTemplateColumns={gridCols}>
-              <Label icon={i.star}>Score</Label>
+              <Label icon={i.star}>Note</Label>
               {firms.map((firm) => (
                 <div key={firm.id} className={valueCardClass}>
                   <ScoreRing score={firm.score} />

@@ -14,7 +14,6 @@ import { AccountRulesBanner } from "@/components/account-rules-banner";
 import { CompareDetailModal } from "@/components/compare-detail-modal";
 import { CompareFundedRulesModal } from "@/components/compare-funded-rules-modal";
 import { FirmAccountCell } from "@/components/firm-account-cell";
-import Navbar from "@/components/navbar";
 import { PlatformLogos } from "@/components/platform-logos";
 import type {
   AccountRulesBrief,
@@ -42,12 +41,20 @@ import {
   type PlatformId,
 } from "@/lib/platforms";
 
-/** Compare — kicker (couleur --cmp-mist, défini sur html.compare-light). */
+/** Compare — petit libellé (contraste direct : évite --cmp-mist trop pâle / flou). */
 const COMPARE_KICKER =
-  "text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--cmp-mist)]";
+  "text-[10px] font-semibold uppercase tracking-[0.2em] text-white/78";
+
+/** Titres des blocs filtres dans la colonne latérale. */
+const COMPARE_FILTER_SECTION_TITLE =
+  "text-[11px] font-semibold uppercase tracking-[0.14em] text-white/88";
 
 const COMPARE_PANEL =
   "rounded-2xl border border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-surface)] shadow-[0_16px_40px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.045)]";
+
+/** Barres sticky (résultats, comparaison) : fond bordeaux opaque, sans backdrop-blur (évite le gris-bleu). */
+const COMPARE_STICKY_BAR =
+  "rounded-2xl border border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-ink-850)] shadow-[0_16px_40px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.045)]";
 
 const COMPARE_TABLE_ROW_BASE =
   "overflow-hidden rounded-xl border border-[color:var(--cmp-sage-border)] shadow-sm shadow-black/20 transition-[background-color,box-shadow,border-color] duration-200 hover:border-[color:var(--cmp-sage-strong)] hover:shadow-md";
@@ -178,7 +185,7 @@ function scoreRingConfig(score: number) {
 
 type ScoreTier = "high" | "mid" | "low";
 
-/** Filtres — accent sauge (variables --cmp-*). */
+/** Filtres — accents rouge atténué / blanc (variables --cmp-*). */
 function filterPill(active: boolean) {
   return active
     ? "border-[color:var(--cmp-sage-strong)] bg-[color:var(--cmp-sage-soft)] text-[color:var(--foreground)] shadow-sm shadow-black/25"
@@ -201,7 +208,7 @@ function FilterCheckbox({
         className="peer absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
       />
       <span
-        className="pointer-events-none col-start-1 row-start-1 flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border border-[color:var(--cmp-sage-border)] bg-black/45 transition duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-[color:rgba(125,158,148,0.35)] peer-checked:border-[color:var(--cmp-sage-strong)] peer-checked:bg-[color:var(--cmp-sage-soft)] peer-checked:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+        className="pointer-events-none col-start-1 row-start-1 flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border border-[color:var(--cmp-sage-border)] bg-black/45 transition duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-[color:var(--cmp-ring)] peer-checked:border-[color:var(--cmp-sage-strong)] peer-checked:bg-[color:var(--cmp-sage-soft)] peer-checked:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
         aria-hidden
       >
         <svg
@@ -253,10 +260,12 @@ function FilterSection({
   children: ReactNode;
 }) {
   return (
-    <div className="border-b border-slate-600/15 py-5 first:pt-0 last:border-b-0 last:pb-0">
-      <p className={COMPARE_KICKER}>{title}</p>
+    <div className="border-b border-[color:var(--cmp-sage-border)]/40 py-5 first:pt-0 last:border-b-0 last:pb-0">
+      <p className={COMPARE_FILTER_SECTION_TITLE}>{title}</p>
       {hint ? (
-        <p className="mt-1 text-[10px] leading-relaxed text-slate-500">{hint}</p>
+        <p className="mt-1 text-[10px] leading-relaxed text-[color:var(--cmp-steel)]">
+          {hint}
+        </p>
       ) : null}
       <div className="mt-3.5">{children}</div>
     </div>
@@ -307,7 +316,7 @@ function formatPromoExpiryLabel(): string {
 }
 
 function paymentPlanLabel(plan: PaymentPlan): string {
-  return plan === "subscription" ? "Subscription" : "One-time payment";
+  return plan === "subscription" ? "Abonnement" : "Paiement unique";
 }
 
 function compareFirmsForSort(
@@ -366,7 +375,7 @@ function CompareIcon() {
   );
 }
 
-/** Drawdown — pastille « brume » (gris violacé discret, pas violet vif). */
+/** Drawdown — pastille rouge très atténuée sur fond sombre. */
 const DRAWDOWN_PILL_CLASS =
   "border-[color:var(--cmp-dusk-line)] bg-[color:var(--cmp-dusk-fill)] text-[color:var(--cmp-dusk-text)]";
 
@@ -393,10 +402,10 @@ function withAffiliateTracking(
 }
 
 const QUICK_SORTS: { key: SortKey; label: string }[] = [
-  { key: "price", label: "Price" },
-  { key: "score", label: "Score" },
-  { key: "size", label: "Size" },
-  { key: "propfirm", label: "PROPFIRM" },
+  { key: "price", label: "Prix" },
+  { key: "score", label: "Note" },
+  { key: "size", label: "Taille" },
+  { key: "propfirm", label: "Prop firm" },
   { key: "activation", label: "Activation" },
 ];
 
@@ -450,7 +459,7 @@ function ActiveFilterChip({
         type="button"
         onClick={onRemove}
         className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] text-white/45 transition hover:bg-white/12 hover:text-white"
-        aria-label={`Remove filter ${shown}`}
+        aria-label={`Retirer le filtre ${shown}`}
       >
         ×
       </button>
@@ -557,6 +566,8 @@ export default function ComparePage() {
   const [compareIds, setCompareIds] = useState<number[]>([]);
   const [compareDetailOpen, setCompareDetailOpen] = useState(false);
   const [fundedRulesFirm, setFundedRulesFirm] = useState<PropFirm | null>(null);
+  /** Tiroir filtres — mobile / tablette ; sidebar fixe à partir de `lg`. */
+  const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
 
   const compareDetailFirms = useMemo(() => {
     return compareIds
@@ -588,6 +599,34 @@ export default function ComparePage() {
       // Ignore clipboard errors silently
     }
   }, []);
+
+  useEffect(() => {
+    if (!filtersDrawerOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [filtersDrawerOpen]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const closeIfDesktop = () => {
+      if (mq.matches) setFiltersDrawerOpen(false);
+    };
+    closeIfDesktop();
+    mq.addEventListener("change", closeIfDesktop);
+    return () => mq.removeEventListener("change", closeIfDesktop);
+  }, []);
+
+  useEffect(() => {
+    if (!filtersDrawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFiltersDrawerOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [filtersDrawerOpen]);
 
   const totalFirms = propFirms.length;
 
@@ -798,34 +837,57 @@ export default function ComparePage() {
   return (
     <main className="relative min-h-screen bg-gradient-to-b from-[var(--cmp-ink-900)] via-[var(--cmp-ink-950)] to-[var(--cmp-ink-950)] text-[color:var(--foreground)]">
       {/*
-        lg+: sidebar and navbar share the same top row (Filters aligns with nav).
-        Navbar only spans the main column, not the filter column.
+        lg+: colonne filtres sticky à gauche, zone principale à droite.
       */}
       <div className="flex w-full max-w-[100vw] flex-col lg:min-h-screen lg:flex-row">
-        <aside className="hidden border-r border-[color:var(--cmp-sage-border)] bg-gradient-to-b from-[var(--cmp-ink-850)] to-[var(--cmp-ink-950)] lg:sticky lg:top-0 lg:flex lg:h-screen lg:max-h-screen lg:w-[clamp(220px,22vw,300px)] lg:shrink-0 lg:self-start lg:flex-col lg:overflow-hidden xl:w-[clamp(240px,20vw,320px)]">
+        {filtersDrawerOpen ? (
+          <button
+            type="button"
+            aria-label="Fermer les filtres"
+            className="fixed inset-0 z-[44] bg-black/55 backdrop-blur-sm lg:hidden"
+            onClick={() => setFiltersDrawerOpen(false)}
+          />
+        ) : null}
+        <aside
+          id="compare-filters-panel"
+          className={`fixed inset-y-0 left-0 z-[45] flex w-[min(320px,90vw)] max-w-[320px] flex-col border-r border-[color:var(--cmp-sage-border)] bg-gradient-to-b from-[var(--cmp-ink-850)] to-[var(--cmp-ink-950)] shadow-[6px_0_28px_rgba(0,0,0,0.35)] transition-[transform] duration-300 ease-out lg:pointer-events-auto lg:static lg:z-auto lg:max-w-none lg:w-[clamp(220px,22vw,300px)] lg:translate-x-0 lg:shadow-none lg:sticky lg:top-0 lg:h-screen lg:max-h-screen lg:shrink-0 lg:self-start lg:overflow-hidden xl:w-[clamp(240px,20vw,320px)] ${
+            filtersDrawerOpen
+              ? "translate-x-0"
+              : "-translate-x-full pointer-events-none"
+          }`}
+        >
             <div className="flex min-h-0 flex-1 flex-col">
             <div className="shrink-0 border-b border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-surface)] px-5 pb-3 pt-4">
-              <header className="mb-0">
-                <p className={COMPARE_KICKER}>Refine</p>
-                <h2 className="mt-2 text-xl font-semibold tracking-tight text-[color:var(--foreground)]">
-                  Filters
-                </h2>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-[color:var(--cmp-steel)]">
-                  Combine filters freely. Leaving a group empty includes every
-                  option in that group.
-                </p>
-              </header>
+              <div className="flex items-start justify-between gap-3">
+                <header className="mb-0 min-w-0 flex-1">
+                  <h2 className="text-xl font-semibold tracking-tight text-[color:var(--foreground)]">
+                    Filtres
+                  </h2>
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-[color:var(--cmp-steel)]">
+                    Combinez les filtres librement. Laisser un groupe vide inclut
+                    toutes les options de ce groupe.
+                  </p>
+                </header>
+                <button
+                  type="button"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/12 text-xl leading-none text-[color:var(--cmp-steel)] transition hover:border-[color:var(--cmp-sage-strong)] hover:bg-[color:var(--cmp-sage-soft)] hover:text-[color:var(--foreground)] lg:hidden"
+                  aria-label="Fermer les filtres"
+                  onClick={() => setFiltersDrawerOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
             </div>
             <div
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-transparent px-5 pb-7 pt-4 [scrollbar-color:rgba(255,255,255,0.12)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/12 [&_button]:transition-transform [&_button]:duration-200 [&_button:hover]:-translate-y-px [&_label]:transition-transform [&_label]:duration-200 [&_label:hover]:-translate-y-px [&_input]:transition-transform [&_input]:duration-200 [&_input:hover]:-translate-y-px [&_input:focus]:-translate-y-px"
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-transparent px-5 pt-4 pb-[max(1.75rem,env(safe-area-inset-bottom))] [scrollbar-color:rgba(255,255,255,0.12)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/12 [&_button]:transition-transform [&_button]:duration-200 [&_button:hover]:-translate-y-px [&_label]:transition-transform [&_label]:duration-200 [&_label:hover]:-translate-y-px [&_input]:transition-transform [&_input]:duration-200 [&_input:hover]:-translate-y-px [&_input:focus]:-translate-y-px"
             >
             <div className="flex flex-col pb-2">
-              <FilterSection title="Search">
+              <FilterSection title="Recherche">
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search…"
-                  className="w-full rounded-xl border border-[color:var(--cmp-sage-border)] bg-black/30 px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--cmp-steel)] transition focus:border-[color:var(--cmp-sage-strong)] focus:outline-none focus:ring-1 focus:ring-[color:rgba(125,158,148,0.28)]"
+                  placeholder="Rechercher…"
+                  className="w-full rounded-xl border border-[color:var(--cmp-sage-border)] bg-black/30 px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--cmp-steel)] transition focus:border-[color:var(--cmp-sage-strong)] focus:outline-none focus:ring-1 focus:ring-[color:var(--cmp-ring)]"
                 />
               </FilterSection>
 
@@ -834,7 +896,7 @@ export default function ComparePage() {
                   {visiblePropFirms.map(({ name, logoSrc: logo }) => (
                     <label
                       key={name}
-                      className="group flex cursor-pointer items-center gap-3 rounded-xl border border-transparent px-2 py-2 transition hover:border-slate-600/25 hover:bg-white/[0.04]"
+                      className="group flex cursor-pointer items-center gap-3 rounded-xl border border-transparent px-2 py-2 transition hover:border-[color:var(--cmp-sage-border)]/50 hover:bg-white/[0.04]"
                     >
                       <FilterCheckbox
                         checked={selectedFirmNames.includes(name)}
@@ -870,7 +932,7 @@ export default function ComparePage() {
                     onClick={() =>
                       setPropFirmListExpanded((prev) => !prev)
                     }
-                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-transparent py-2 text-[11px] font-medium text-slate-500 transition hover:border-slate-600/25 hover:bg-white/[0.04] hover:text-white/75"
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-transparent py-2 text-[11px] font-medium text-[color:var(--cmp-steel)] transition hover:border-[color:var(--cmp-sage-border)]/50 hover:bg-white/[0.04] hover:text-white/75"
                   >
                     {propFirmListExpanded ? (
                       <>
@@ -886,7 +948,7 @@ export default function ComparePage() {
                         >
                           <path d="M2 7.5L6 3.5L10 7.5" />
                         </svg>
-                        Collapse
+                        Réduire
                       </>
                     ) : (
                       <>
@@ -902,14 +964,14 @@ export default function ComparePage() {
                         >
                           <path d="M2 4.5L6 8.5L10 4.5" />
                         </svg>
-                        Show all
+                        Tout afficher
                       </>
                     )}
                   </button>
                 ) : null}
               </FilterSection>
 
-              <FilterSection title="Account size">
+              <FilterSection title="Taille de compte">
                 <div className="grid grid-cols-2 gap-2">
                   {ACCOUNT_SIZES.map((item) => (
                     <button
@@ -928,7 +990,7 @@ export default function ComparePage() {
                 </div>
               </FilterSection>
 
-              <FilterSection title="Account type">
+              <FilterSection title="Type de compte">
                 <div className="grid grid-cols-2 gap-2">
                   {(["Eval", "Direct"] as const).map((t) => (
                     <button
@@ -949,7 +1011,7 @@ export default function ComparePage() {
                 </div>
               </FilterSection>
 
-              <FilterSection title="Drawdown type">
+              <FilterSection title="Type de drawdown">
                 <div className="grid grid-cols-2 gap-2">
                   {DRAWDOWN_FILTERS.map((item) => (
                     <button
@@ -970,14 +1032,14 @@ export default function ComparePage() {
                 </div>
               </FilterSection>
 
-              <FilterSection title="Platform">
+              <FilterSection title="Plateforme">
                 <div className="space-y-0.5">
                   {PLATFORM_FILTER_IDS.map((pid) => {
                     const src = platformLogoSrc[pid];
                     return (
                       <label
                         key={pid}
-                        className="group flex cursor-pointer items-center gap-3 rounded-xl border border-transparent px-2 py-2 transition hover:border-slate-600/25 hover:bg-white/[0.04]"
+                        className="group flex cursor-pointer items-center gap-3 rounded-xl border border-transparent px-2 py-2 transition hover:border-[color:var(--cmp-sage-border)]/50 hover:bg-white/[0.04]"
                       >
                         <FilterCheckbox
                           checked={selectedPlatforms.includes(pid)}
@@ -1009,13 +1071,13 @@ export default function ComparePage() {
                 </div>
               </FilterSection>
 
-              <FilterSection title="Daily loss limit">
+              <FilterSection title="Perte journalière">
                 <div className="grid grid-cols-3 gap-1.5">
                   {(
                     [
-                      { id: "all" as const, label: "Any" },
-                      { id: "none" as const, label: "None" },
-                      { id: "with" as const, label: "Set" },
+                      { id: "all" as const, label: "Tout" },
+                      { id: "none" as const, label: "Aucune" },
+                      { id: "with" as const, label: "Définie" },
                     ] as const
                   ).map(({ id, label }) => (
                     <button
@@ -1032,7 +1094,7 @@ export default function ComparePage() {
                 </div>
               </FilterSection>
 
-              <FilterSection title="Score">
+              <FilterSection title="Note">
                 <div className="space-y-2">
                   <button
                     type="button"
@@ -1041,14 +1103,14 @@ export default function ComparePage() {
                       selectedScoreTiers.length === 0
                     )}`}
                   >
-                    All scores
+                    Toutes les notes
                   </button>
                   <div className="grid grid-cols-3 gap-2">
                     {(
                       [
-                        { id: "high" as const, label: "High 8–10" },
-                        { id: "mid" as const, label: "Mid 4–7" },
-                        { id: "low" as const, label: "Low 1–3" },
+                        { id: "high" as const, label: "Haut 8–10" },
+                        { id: "mid" as const, label: "Moyen 4–7" },
+                        { id: "low" as const, label: "Bas 1–3" },
                       ] as const
                     ).map(({ id, label }) => (
                       <button
@@ -1070,13 +1132,13 @@ export default function ComparePage() {
                 </div>
               </FilterSection>
 
-              <FilterSection title="Max price ($)">
+              <FilterSection title="Prix max">
                 <input
                   value={maxPriceUsd}
                   onChange={(e) => setMaxPriceUsd(e.target.value)}
                   inputMode="decimal"
-                  placeholder="e.g. 150"
-                  className="w-full rounded-xl border border-[color:var(--cmp-sage-border)] bg-black/30 px-3 py-2.5 text-sm tabular-nums text-[color:var(--foreground)] placeholder:text-[color:var(--cmp-steel)] transition focus:border-[color:var(--cmp-sage-strong)] focus:outline-none focus:ring-1 focus:ring-[color:rgba(125,158,148,0.28)]"
+                  placeholder="ex. 150"
+                  className="w-full rounded-xl border border-[color:var(--cmp-sage-border)] bg-black/30 px-3 py-2.5 text-sm tabular-nums text-[color:var(--foreground)] placeholder:text-[color:var(--cmp-steel)] transition focus:border-[color:var(--cmp-sage-strong)] focus:outline-none focus:ring-1 focus:ring-[color:var(--cmp-ring)]"
                 />
               </FilterSection>
 
@@ -1086,7 +1148,7 @@ export default function ComparePage() {
                   onClick={clearFilters}
                   className="w-full rounded-xl border border-rose-500/25 bg-rose-500/8 px-3 py-3 text-sm font-medium text-rose-200/95 transition hover:border-rose-400/35 hover:bg-rose-500/12 hover:text-rose-100"
                 >
-                  Reset all filters
+                  Réinitialiser tous les filtres
                 </button>
               </div>
             </div>
@@ -1096,29 +1158,29 @@ export default function ComparePage() {
 
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute right-[10%] top-32 h-64 w-64 rounded-full bg-[color:rgba(125,158,148,0.07)] blur-3xl" />
+            <div className="absolute right-[10%] top-32 h-64 w-64 rounded-full bg-[color:var(--cmp-orb)] blur-3xl" />
           </div>
 
           <div className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col">
-          <Navbar theme="petrol" />
-
           {copiedPromoCode ? (
             <div
               className={`pointer-events-none fixed inset-x-0 flex justify-center px-4 ${
                 compareDetailOpen
-                  ? "top-24 z-[110]"
-                  : "top-20 z-50"
+                  ? "top-16 z-[110]"
+                  : "top-14 z-50"
               }`}
             >
-              <div className="pointer-events-auto rounded-xl border border-slate-600/30 bg-slate-950/95 px-4 py-2.5 text-xs font-medium text-slate-100 shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
-                {`Code "${copiedPromoCode}" copied!`}
+              <div className="pointer-events-auto rounded-xl border border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-surface)] px-4 py-2.5 text-xs font-medium text-[color:var(--foreground)] shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
+                {`Code « ${copiedPromoCode} » copié !`}
               </div>
             </div>
           ) : null}
 
         <section className="min-w-0 flex-1">
           <div className="px-4 py-4 md:px-6">
-            <div className={`sticky top-[73px] z-40 flex min-w-0 flex-col gap-3 px-5 pt-2 pb-4 backdrop-blur-xl ${COMPARE_PANEL} bg-slate-950/75`}>
+            <div
+              className={`sticky top-0 z-40 flex min-w-0 flex-col gap-3 px-5 pt-2 pb-4 ${COMPARE_STICKY_BAR}`}
+            >
               {(query.trim() !== "" ||
                 selectedFirmNames.length > 0 ||
                 selectedAccountTypes.length > 0 ||
@@ -1131,7 +1193,7 @@ export default function ComparePage() {
                 <div className="-mx-1 flex flex-nowrap gap-1.5 overflow-x-auto border-b border-[color:var(--cmp-sage-border)] px-1 pb-3 [scrollbar-width:thin]">
                   {query.trim() !== "" ? (
                     <ActiveFilterChip
-                      label={`Search: ${query.trim()}`}
+                      label={`Recherche : ${query.trim()}`}
                       onRemove={() => setQuery("")}
                     />
                   ) : null}
@@ -1149,7 +1211,7 @@ export default function ComparePage() {
                   {selectedAccountTypes.map((t) => (
                     <ActiveFilterChip
                       key={`atype-${t}`}
-                      label={`${t} account`}
+                      label={`Compte ${t}`}
                       onRemove={() =>
                         setSelectedAccountTypes((prev) =>
                           prev.filter((x) => x !== t)
@@ -1195,10 +1257,10 @@ export default function ComparePage() {
                       key={`tier-${tier}`}
                       label={
                         tier === "high"
-                          ? "Score 8–10"
+                          ? "Note 8–10"
                           : tier === "mid"
-                            ? "Score 4–7"
-                            : "Score 1–3"
+                            ? "Note 4–7"
+                            : "Note 1–3"
                       }
                       onRemove={() =>
                         setSelectedScoreTiers((prev) =>
@@ -1209,7 +1271,7 @@ export default function ComparePage() {
                   ))}
                   {maxPriceUsd.trim() !== "" ? (
                     <ActiveFilterChip
-                      label={`Max $${maxPriceUsd.trim()}`}
+                      label={`Prix max : $${maxPriceUsd.trim()}`}
                       onRemove={() => setMaxPriceUsd("")}
                     />
                   ) : null}
@@ -1217,8 +1279,8 @@ export default function ComparePage() {
                     <ActiveFilterChip
                       label={
                         dailyLossFilter === "none"
-                          ? "Daily loss: none listed"
-                          : "Daily loss: amount set"
+                          ? "Perte jour. : non indiquée"
+                          : "Perte jour. : montant indiqué"
                       }
                       onRemove={() => setDailyLossFilter("all")}
                     />
@@ -1228,16 +1290,38 @@ export default function ComparePage() {
 
               <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="flex min-w-0 flex-wrap items-end gap-5">
-                <div>
-                  <p className={COMPARE_KICKER}>Results</p>
+                <div className="flex items-end gap-3">
+                  <button
+                    type="button"
+                    className="mb-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-sage-softer)] text-[color:var(--foreground)] shadow-sm transition hover:border-[color:var(--cmp-sage-strong)] hover:bg-[color:var(--cmp-sage-soft)] lg:hidden"
+                    aria-expanded={filtersDrawerOpen}
+                    aria-controls="compare-filters-panel"
+                    onClick={() => setFiltersDrawerOpen(true)}
+                    aria-label="Ouvrir les filtres"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      aria-hidden
+                    >
+                      <path d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </button>
+                  <div>
+                  <p className={COMPARE_KICKER}>Résultats</p>
                   <p className="mt-2 flex items-baseline gap-1.5">
                     <span className="text-3xl font-semibold tabular-nums tracking-tight text-white">
                       {filteredFirms.length}
                     </span>
-                    <span className="text-sm tabular-nums text-slate-500">
+                    <span className="text-sm tabular-nums text-[color:var(--cmp-steel)]">
                       / {totalFirms}
                     </span>
                   </p>
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
@@ -1249,19 +1333,19 @@ export default function ComparePage() {
                     }}
                     className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
                       compareMode
-                        ? "border-[rgba(142,191,176,0.38)] bg-[color:rgba(142,191,176,0.12)] text-[color:var(--cmp-mint)] shadow-sm shadow-black/15"
+                        ? "border-[color:var(--cmp-compare-active-border)] bg-[color:var(--cmp-compare-active-bg)] text-[color:var(--cmp-mint)] shadow-sm shadow-black/15"
                         : "border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-sage-softer)] text-[color:var(--foreground)] hover:border-[color:var(--cmp-sage-strong)] hover:bg-[color:var(--cmp-sage-soft)]"
                     }`}
                   >
                     <CompareIcon />
-                    {compareMode ? "Cancel compare" : "Compare"}
+                    {compareMode ? "Annuler" : "Comparer"}
                   </button>
                   <button
                     type="button"
                     onClick={clearFilters}
                     className="rounded-xl border border-rose-500/25 bg-rose-500/8 px-4 py-2.5 text-sm font-semibold text-rose-200/95 transition hover:border-rose-400/35 hover:bg-rose-500/12"
                   >
-                    Reset
+                    Réinitialiser
                   </button>
                 </div>
               </div>
@@ -1269,7 +1353,7 @@ export default function ComparePage() {
               <div
                 className="-mx-1 flex flex-nowrap gap-1.5 overflow-x-auto px-1 sm:gap-2 lg:justify-end [scrollbar-width:thin]"
                 role="group"
-                aria-label="Quick sort"
+                aria-label="Tri rapide"
               >
                 {QUICK_SORTS.map(({ key, label }) => {
                   const active = sortKey === key;
@@ -1297,7 +1381,7 @@ export default function ComparePage() {
             </div>
             </div>
 
-            <div id="compare-table" className="mt-6 w-full min-w-0 scroll-mt-28">
+            <div id="compare-table" className="mt-6 w-full min-w-0 scroll-mt-20">
               <div className="w-full min-w-0 overflow-x-auto lg:overflow-x-hidden">
                 <div className="w-max min-w-full lg:w-full lg:min-w-0">
                   {/*
@@ -1315,12 +1399,12 @@ export default function ComparePage() {
                     <div
                       className={`flex min-w-0 items-center justify-center text-center ${COMPARE_SIZE_COL_INSET}`}
                     >
-                      Size
+                      Taille
                     </div>
                     <div
                       className={`flex min-w-0 items-center justify-start text-left ${COMPARE_PRICE_COL_INSET}`}
                     >
-                      Price
+                      Prix
                     </div>
                     <div
                       className={`flex min-w-0 items-center justify-center text-center ${COMPARE_PROMO_COL_INSET}`}
@@ -1328,19 +1412,19 @@ export default function ComparePage() {
                       Promo
                     </div>
                     <div className="flex min-w-0 items-center justify-center text-center">
-                      Billing
+                      Facturation
                     </div>
                     <div className="flex min-w-0 items-center justify-center text-center">
                       Activation
                     </div>
                     <div className="flex min-w-0 items-center justify-center text-center">
-                      Data feed
+                      Flux
                     </div>
                     <div className="flex min-w-0 items-center justify-center text-center">
                       Drawdown
                     </div>
                     <div className="flex min-w-0 items-center justify-center text-center">
-                      Target
+                      Objectif
                     </div>
                     <div className="flex min-w-0 flex-col items-center justify-center text-center leading-snug">
                       <span className="max-w-[6.5rem]">
@@ -1351,7 +1435,7 @@ export default function ComparePage() {
                       </span>
                     </div>
                     <div className="flex min-w-0 items-center justify-center text-center">
-                      Score
+                      Note
                     </div>
                     <div className="flex min-w-0 items-center justify-center text-center">
                       Action
@@ -1432,7 +1516,7 @@ export default function ComparePage() {
                                 );
                                 const tooltipSecondLine =
                                   firm.discountTooltipFooter ??
-                                  `Expires on ${
+                                  `Expire le ${
                                     firm.promoExpiry ??
                                     formatPromoExpiryLabel()
                                   }`;
@@ -1453,17 +1537,17 @@ export default function ComparePage() {
                                     </span>
 
                                     <span
-                                      className="pointer-events-none absolute left-full top-1/2 z-10 ml-2 w-[180px] -translate-y-1/2 rounded-xl border border-slate-600/30 bg-slate-950/95 px-3 py-2.5 text-[11px] text-zinc-200 opacity-0 shadow-[0_18px_40px_rgba(0,0,0,0.45)] backdrop-blur-sm transition group-hover:opacity-100"
+                                      className="pointer-events-none absolute left-full top-1/2 z-10 ml-2 w-[180px] -translate-y-1/2 rounded-xl border border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-surface)] px-3 py-2.5 text-[11px] text-[color:var(--foreground)] opacity-0 shadow-[0_18px_40px_rgba(0,0,0,0.45)] backdrop-blur-sm transition group-hover:opacity-100"
                                     >
                                       <div className="flex items-center justify-between gap-3">
-                                        <span className="text-zinc-200/85">
-                                          Discount
+                                        <span className="text-[color:var(--foreground)]/85">
+                                          Remise
                                         </span>
                                         <span className="font-semibold text-[color:var(--cmp-mint-dim)]">
                                           -{pct}%
                                         </span>
                                       </div>
-                                      <div className="mt-1 text-center text-zinc-400">
+                                      <div className="mt-1 text-center text-[color:var(--cmp-steel)]">
                                         {tooltipSecondLine}
                                       </div>
                                     </span>
@@ -1471,7 +1555,7 @@ export default function ComparePage() {
                                 );
                               })()}
                             </div>
-                            <span className="text-left text-[12px] text-slate-500 line-through">
+                            <span className="text-left text-[12px] text-[color:var(--cmp-steel)] line-through">
                               {formatUsdCompact(firm.regularPrice)}
                             </span>
                           </div>
@@ -1525,9 +1609,9 @@ export default function ComparePage() {
                             {formatUsdCompact(firm.activationFeeUsd ?? 0)}
                           </span>
                         )}
-                        <p className="mt-1 text-[11px] text-slate-500">
-                          Total:{" "}
-                          <span className="text-slate-400">
+                        <p className="mt-1 text-[11px] text-[color:var(--cmp-steel)]">
+                          Total :{" "}
+                          <span className="text-[color:var(--cmp-mist)]">
                             {formatUsdCompact(evalStartupTotalUsd(firm))}
                           </span>
                         </p>
@@ -1584,7 +1668,7 @@ export default function ComparePage() {
                           data-row-click-ignore="true"
                           className="inline-flex max-w-[min(100%,25rem)] shrink-0 items-center justify-center whitespace-nowrap rounded-xl border border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-sage-softer)] px-10 py-2.5 text-center text-[11px] font-semibold leading-tight tracking-[-0.01em] text-[color:var(--foreground)] shadow-sm shadow-black/25 transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-[color:var(--cmp-sage-strong)] hover:bg-[color:var(--cmp-sage-soft)] active:translate-y-0"
                         >
-                          Start Evaluation
+                          Start challenge
                         </a>
                       </div>
                     </div>
@@ -1606,12 +1690,14 @@ export default function ComparePage() {
             </div>
             {compareMode ? (
               <div className="fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
-                <div className={`inline-flex items-center justify-between gap-3 px-5 py-2.5 backdrop-blur-xl ${COMPARE_PANEL} bg-slate-950/90`}>
-                  <div className="text-sm text-slate-400">
+                <div
+                  className={`inline-flex items-center justify-between gap-3 px-5 py-2.5 ${COMPARE_STICKY_BAR}`}
+                >
+                  <div className="text-sm text-[color:var(--cmp-steel)]">
                     <span className="font-semibold text-white">
                       {compareIds.length}
                     </span>{" "}
-                    / 4 selected
+                    / 4 sélectionné(s)
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -1624,10 +1710,10 @@ export default function ComparePage() {
                       className={`rounded-xl px-5 py-2 text-sm font-semibold transition ${
                         compareIds.length < 2
                           ? "cursor-not-allowed border border-white/8 bg-white/[0.06] text-white/35"
-                          : "border border-[color:var(--cmp-sage-strong)] bg-[color:var(--cmp-sage-soft)] text-[color:var(--foreground)] hover:bg-[color:rgba(125,158,148,0.22)]"
+                          : "border border-[color:var(--cmp-sage-strong)] bg-[color:var(--cmp-sage-soft)] text-[color:var(--foreground)] hover:bg-[color:var(--cmp-hover-mid)]"
                       }`}
                     >
-                      Compare
+                      Comparer
                     </button>
                     <button
                       type="button"
@@ -1637,7 +1723,7 @@ export default function ComparePage() {
                         setCompareDetailOpen(false);
                       }}
                       className="flex h-8 w-8 items-center justify-center rounded-xl border border-[color:var(--cmp-sage-border)] text-[color:var(--cmp-steel)] transition hover:border-[color:var(--cmp-sage-strong)] hover:bg-[color:var(--cmp-sage-soft)] hover:text-[color:var(--foreground)]"
-                      aria-label="Close compare selection"
+                      aria-label="Fermer la sélection de comparaison"
                     >
                       ×
                     </button>

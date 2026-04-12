@@ -77,7 +77,7 @@ function LabelInfoTrigger({ info }: { info: RuleLabelInfoPopover }) {
     mounted && open ? (
       <div
         data-label-info-panel
-        className="fixed z-[200] w-[min(19rem,calc(100vw-1.5rem))] rounded-xl border border-white/14 bg-[#0a0e16]/[0.98] px-3.5 py-3 text-left shadow-[0_14px_44px_rgba(0,0,0,0.5)] ring-1 ring-black/45 backdrop-blur-md"
+        className="fixed z-[200] w-[min(19rem,calc(100vw-1.5rem))] rounded-xl border border-rose-950/35 bg-[#140c10]/[0.98] px-3.5 py-3 text-left shadow-[0_14px_44px_rgba(0,0,0,0.5)] ring-1 ring-black/40 backdrop-blur-md"
         style={{
           left: coords.x + 14,
           top: Math.max(6, coords.y - 8),
@@ -120,8 +120,8 @@ function LabelInfoTrigger({ info }: { info: RuleLabelInfoPopover }) {
       >
         <button
           type="button"
-          className="rounded-full text-white/48 outline-none transition hover:text-sky-300/95 focus-visible:ring-2 focus-visible:ring-sky-400/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080b12]"
-          aria-label="More information"
+          className="rounded-full text-white/48 outline-none transition hover:text-rose-300/95 focus-visible:ring-2 focus-visible:ring-rose-400/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#10080a]"
+          aria-label="Plus d’informations"
           aria-expanded={open}
           aria-haspopup="true"
           onClick={(e) => {
@@ -163,17 +163,17 @@ export function RuleCell({
 }) {
   return (
     <div>
-      <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/38">
+      <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-200/58">
         <span>{label}</span>
         {labelInfoPopover ? (
           <LabelInfoTrigger info={labelInfoPopover} />
         ) : labelInfoTooltip ? (
           <span className="group/intip relative inline-flex shrink-0 align-middle">
             <span
-              className="cursor-help text-white/48 transition group-hover/intip:text-sky-300/95"
+              className="cursor-help text-white/48 transition group-hover/intip:text-rose-300/95"
               title={labelInfoTooltip}
               role="img"
-              aria-label="Information"
+              aria-label="Informations"
             >
               <StylizedInfoIcon className="h-[17px] w-[17px]" />
             </span>
