@@ -192,7 +192,7 @@ const bulenoxBase = {
   platforms: ["rithmic"] as PlatformId[],
   roundTripMnqNq: "$0.61 / $2.09",
   score: 8,
-  affiliateUrl: "https://bulenox.com",
+  affiliateUrl: "https://bulenox.com/member/aff/go/hirobym",
   isSponsored: false,
   rules: bulenoxRulesBase,
   promoExpiry: "-",

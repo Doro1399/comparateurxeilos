@@ -13,6 +13,7 @@ import {
 import { AccountRulesBanner } from "@/components/account-rules-banner";
 import { CompareDetailModal } from "@/components/compare-detail-modal";
 import { CompareFundedRulesModal } from "@/components/compare-funded-rules-modal";
+import { SuggestPropfirmSidebarWidget } from "@/components/suggest-propfirm/suggest-propfirm-sidebar-widget";
 import { FirmAccountCell } from "@/components/firm-account-cell";
 import { PlatformLogos } from "@/components/platform-logos";
 import type {
@@ -335,7 +336,7 @@ function compareFirmsForSort(
   let delta = 0;
   switch (key) {
     case "price":
-      delta = effectivePrice(a) - effectivePrice(b);
+      delta = evalStartupTotalUsd(a) - evalStartupTotalUsd(b);
       break;
     case "score":
       delta = a.score - b.score;
@@ -552,6 +553,11 @@ export default function ComparePage() {
   const [dailyLossFilter, setDailyLossFilter] = useState<
     "all" | "none" | "with"
   >("all");
+  const compareResultsStickyRef = useRef<HTMLDivElement>(null);
+  const compareTableHeaderStickyRef = useRef<HTMLDivElement>(null);
+  const compareHeaderScrollRef = useRef<HTMLDivElement>(null);
+  const compareBodyScrollRef = useRef<HTMLDivElement>(null);
+
   const [sortKey, setSortKey] = useState<SortKey>(
     DEFAULT_COMPARE_TABLE_SORT
   );
@@ -633,6 +639,73 @@ export default function ComparePage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [filtersDrawerOpen]);
+
+  /** Met à jour `top` du bandeau libellés (impératif : évite un re-render à chaque scroll). */
+  const syncCompareTableHeaderTop = useCallback(() => {
+    const bar = compareResultsStickyRef.current;
+    const head = compareTableHeaderStickyRef.current;
+    if (!head) return;
+    const topPx = bar
+      ? Math.max(0, Math.ceil(bar.getBoundingClientRect().bottom))
+      : 0;
+    head.style.top = `${topPx}px`;
+  }, []);
+
+  useLayoutEffect(() => {
+    const el = compareResultsStickyRef.current;
+    if (!el) return;
+    syncCompareTableHeaderTop();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => syncCompareTableHeaderTop());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [
+    syncCompareTableHeaderTop,
+    query,
+    selectedFirmNames,
+    selectedAccountTypes,
+    selectedSizes,
+    selectedDrawdowns,
+    selectedPlatforms,
+    selectedScoreTiers,
+    maxPriceUsd,
+    dailyLossFilter,
+    compareMode,
+  ]);
+
+  useEffect(() => {
+    syncCompareTableHeaderTop();
+    window.addEventListener("scroll", syncCompareTableHeaderTop, {
+      passive: true,
+    });
+    window.addEventListener("resize", syncCompareTableHeaderTop);
+    return () => {
+      window.removeEventListener("scroll", syncCompareTableHeaderTop);
+      window.removeEventListener("resize", syncCompareTableHeaderTop);
+    };
+  }, [syncCompareTableHeaderTop]);
+
+  useEffect(() => {
+    const headerEl = compareHeaderScrollRef.current;
+    const bodyEl = compareBodyScrollRef.current;
+    if (!headerEl || !bodyEl) return;
+    const onHeaderScroll = () => {
+      if (bodyEl.scrollLeft !== headerEl.scrollLeft) {
+        bodyEl.scrollLeft = headerEl.scrollLeft;
+      }
+    };
+    const onBodyScroll = () => {
+      if (headerEl.scrollLeft !== bodyEl.scrollLeft) {
+        headerEl.scrollLeft = bodyEl.scrollLeft;
+      }
+    };
+    headerEl.addEventListener("scroll", onHeaderScroll, { passive: true });
+    bodyEl.addEventListener("scroll", onBodyScroll, { passive: true });
+    return () => {
+      headerEl.removeEventListener("scroll", onHeaderScroll);
+      bodyEl.removeEventListener("scroll", onBodyScroll);
+    };
+  }, []);
 
   const totalFirms = propFirms.length;
 
@@ -1159,6 +1232,9 @@ export default function ComparePage() {
               </div>
             </div>
             </div>
+            <div className="shrink-0 border-t border-[color:var(--cmp-sage-border)] bg-[color:var(--cmp-ink-900)]/90 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <SuggestPropfirmSidebarWidget />
+            </div>
             </div>
         </aside>
 
@@ -1185,6 +1261,7 @@ export default function ComparePage() {
         <section className="min-w-0 flex-1">
           <div className="px-4 py-4 md:px-6">
             <div
+              ref={compareResultsStickyRef}
               className={`sticky top-0 z-40 flex min-w-0 flex-col gap-3 px-5 pt-2 pb-4 ${COMPARE_STICKY_BAR}`}
             >
               {(query.trim() !== "" ||
@@ -1388,66 +1465,86 @@ export default function ComparePage() {
             </div>
 
             <div id="compare-table" className="mt-6 w-full min-w-0 scroll-mt-20">
-              <div className="w-full min-w-0 overflow-x-auto lg:overflow-x-hidden">
-                <div className="w-max min-w-full lg:w-full lg:min-w-0">
+              <div className="flex min-w-0 flex-col gap-[7px] px-3">
+                {/*
+                  En-têtes : sticky viewport — top = bas du bloc Résultats (recalculé au scroll).
+                  overflow-x sur un enfant pour ne pas casser le sticky. self-start évite l’étirement flex.
+                */}
+                <div
+                  ref={compareTableHeaderStickyRef}
+                  className="sticky z-[38] w-full self-start shadow-[0_10px_28px_rgba(0,0,0,0.35)]"
+                  style={{ top: 0 }}
+                >
+                  <div
+                    ref={compareHeaderScrollRef}
+                    className="w-full min-w-0 overflow-x-auto overflow-y-visible lg:overflow-x-hidden lg:overflow-y-visible"
+                  >
+                    <div className="w-max min-w-full lg:w-full lg:min-w-0">
+                      <div
+                        className="grid items-center gap-x-2 rounded-t-lg border border-b-0 border-[color:var(--cmp-sage-border)] bg-[var(--cmp-header)] pb-2.5 pt-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground)] sm:gap-x-3 md:gap-x-4 md:text-[11px]"
+                        style={COMPARE_TABLE_GRID_STYLE}
+                      >
+                        <div className="flex min-w-0 items-center self-center pl-3 sm:pl-4 md:pl-6">
+                          Prop firm
+                        </div>
+                        <div
+                          className={`flex min-w-0 items-center justify-center text-center ${COMPARE_SIZE_COL_INSET}`}
+                        >
+                          Taille
+                        </div>
+                        <div
+                          className={`flex min-w-0 items-center justify-start text-left ${COMPARE_PRICE_COL_INSET}`}
+                        >
+                          Prix
+                        </div>
+                        <div
+                          className={`flex min-w-0 items-center justify-center text-center ${COMPARE_PROMO_COL_INSET}`}
+                        >
+                          Promo
+                        </div>
+                        <div className="flex min-w-0 items-center justify-center text-center">
+                          Facturation
+                        </div>
+                        <div className="flex min-w-0 items-center justify-center text-center">
+                          Activation
+                        </div>
+                        <div className="flex min-w-0 items-center justify-center text-center">
+                          Flux
+                        </div>
+                        <div className="flex min-w-0 items-center justify-center text-center">
+                          Drawdown
+                        </div>
+                        <div className="flex min-w-0 items-center justify-center text-center">
+                          Objectif
+                        </div>
+                        <div className="flex min-w-0 flex-col items-center justify-center text-center leading-snug">
+                          <span className="max-w-[6.5rem]">
+                            Round trip
+                            <span className="mt-0.5 block text-[10px] font-normal normal-case tracking-normal text-[color:var(--cmp-mist)] opacity-80">
+                              MNQ / NQ
+                            </span>
+                          </span>
+                        </div>
+                        <div className="flex min-w-0 items-center justify-center text-center">
+                          Note
+                        </div>
+                        <div className="flex min-w-0 items-center justify-center text-center">
+                          Action
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  ref={compareBodyScrollRef}
+                  className="w-full min-w-0 overflow-x-auto overflow-y-visible lg:overflow-x-hidden lg:overflow-y-visible"
+                >
+                  <div className="w-max min-w-full lg:w-full lg:min-w-0">
                   {/*
                     Single horizontal gutter: header + row grids share the same origin so
                     column centers line up with cell content (no double px-3 on body).
                   */}
-                  <div className="px-3">
-                  <div
-                    className="grid items-center gap-x-2 rounded-t-lg border border-b-0 border-[color:var(--cmp-sage-border)] bg-[var(--cmp-header)] pb-2.5 pt-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground)] sm:gap-x-3 md:gap-x-4 md:text-[11px]"
-                    style={COMPARE_TABLE_GRID_STYLE}
-                  >
-                    <div className="flex min-w-0 items-center self-center pl-3 sm:pl-4 md:pl-6">
-                      Prop firm
-                    </div>
-                    <div
-                      className={`flex min-w-0 items-center justify-center text-center ${COMPARE_SIZE_COL_INSET}`}
-                    >
-                      Taille
-                    </div>
-                    <div
-                      className={`flex min-w-0 items-center justify-start text-left ${COMPARE_PRICE_COL_INSET}`}
-                    >
-                      Prix
-                    </div>
-                    <div
-                      className={`flex min-w-0 items-center justify-center text-center ${COMPARE_PROMO_COL_INSET}`}
-                    >
-                      Promo
-                    </div>
-                    <div className="flex min-w-0 items-center justify-center text-center">
-                      Facturation
-                    </div>
-                    <div className="flex min-w-0 items-center justify-center text-center">
-                      Activation
-                    </div>
-                    <div className="flex min-w-0 items-center justify-center text-center">
-                      Flux
-                    </div>
-                    <div className="flex min-w-0 items-center justify-center text-center">
-                      Drawdown
-                    </div>
-                    <div className="flex min-w-0 items-center justify-center text-center">
-                      Objectif
-                    </div>
-                    <div className="flex min-w-0 flex-col items-center justify-center text-center leading-snug">
-                      <span className="max-w-[6.5rem]">
-                        Round trip
-                        <span className="mt-0.5 block text-[10px] font-normal normal-case tracking-normal text-[color:var(--cmp-mist)] opacity-80">
-                          MNQ / NQ
-                        </span>
-                      </span>
-                    </div>
-                    <div className="flex min-w-0 items-center justify-center text-center">
-                      Note
-                    </div>
-                    <div className="flex min-w-0 items-center justify-center text-center">
-                      Action
-                    </div>
-                  </div>
-
                   <div className="flex flex-col gap-[7px] pb-2 pt-0">
                   {filteredFirms.map((firm, rowIndex) => {
                     const expanded = expandedRowId === firm.id;
