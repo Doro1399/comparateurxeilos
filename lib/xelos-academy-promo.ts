@@ -8,7 +8,7 @@ const ACADEMY_PROMO_BY_FIRM: Record<string, string> = {
   "Take Profit Trader": "XEILOSTRADING",
   Tradeify: "6923",
   "Funded Next Futures": "TRADING",
-  "Funded Futures Network": "MYFFN50",
+  "Funded Futures Network": "MYFFN40",
   "Lucid Trading": "XEILOSTRADING",
   "My Funded Futures": "TPF",
   Blusky: "30OFF",
