@@ -312,7 +312,7 @@ const ffnBase = {
   isSponsored: false,
   rules: ffnRulesBase,
   promoExpiry: "-",
-  discountTooltipFooter: "Buy One Get One Free",
+  discountTooltipFooter: "Un compte acheté, un compte gratuit",
   paymentPlan: "subscription" as const,
   activationNote: "With BOGO promo",
 };
