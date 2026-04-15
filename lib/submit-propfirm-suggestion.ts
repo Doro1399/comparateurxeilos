@@ -8,21 +8,19 @@ export type SubmitPropfirmResult =
   | { ok: true }
   | { ok: false; message: string };
 
+/** Formulaire Formspree par défaut (même id que l’URL /f/mdaynzek). Surcharge : NEXT_PUBLIC_FORMSPREE_FORM_ID. */
+const FORMSPREE_DEFAULT_FORM_ID = "mdaynzek";
+
 /**
  * Envoie la suggestion via Formspree (aucune dépendance npm).
- * Crée un formulaire sur https://formspree.io puis renseigne NEXT_PUBLIC_FORMSPREE_FORM_ID.
+ * Optionnel : `NEXT_PUBLIC_FORMSPREE_FORM_ID` au build pour un autre formulaire.
  */
 export async function submitPropfirmSuggestion(
   payload: SuggestPropfirmPayload
 ): Promise<SubmitPropfirmResult> {
-  const formId = process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID?.trim();
-  if (!formId) {
-    return {
-      ok: false,
-      message:
-        "Formulaire non configuré : ajoutez NEXT_PUBLIC_FORMSPREE_FORM_ID dans votre environnement.",
-    };
-  }
+  const formId =
+    process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID?.trim() ||
+    FORMSPREE_DEFAULT_FORM_ID;
 
   try {
     const res = await fetch(`https://formspree.io/f/${formId}`, {
