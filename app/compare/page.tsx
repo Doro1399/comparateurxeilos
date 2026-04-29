@@ -451,6 +451,15 @@ function formatFilterChipLabel(label: string): string {
   return s;
 }
 
+function normalizeFirmFilterName(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
 function ActiveFilterChip({
   label,
   onRemove,
@@ -707,7 +716,13 @@ export default function ComparePage() {
     };
   }, []);
 
-  const totalFirms = propFirms.length;
+  const totalFirms = useMemo(
+    () =>
+      propFirms.filter(
+        (firm) => !(firm.name === "Tradeify" && isTradeifySelectVariantCompareRow(firm))
+      ).length,
+    []
+  );
 
   const visiblePropFirms =
     propFirmListExpanded ||
@@ -763,6 +778,10 @@ export default function ComparePage() {
     const hasMaxFilter =
       maxParsed !== "" && Number.isFinite(maxN) && maxN >= 0;
 
+    const selectedFirmNamesSet = new Set(
+      selectedFirmNames.map((n) => normalizeFirmFilterName(n))
+    );
+
     const base = propFirms.filter((firm) => {
       const queryMatch =
         normalizedQuery.length === 0 ||
@@ -770,8 +789,8 @@ export default function ComparePage() {
         firm.accountName.toLowerCase().includes(normalizedQuery) ||
         firm.roundTripMnqNq.toLowerCase().includes(normalizedQuery);
       const firmMatch =
-        selectedFirmNames.length === 0 ||
-        selectedFirmNames.includes(firm.name);
+        selectedFirmNamesSet.size === 0 ||
+        selectedFirmNamesSet.has(normalizeFirmFilterName(firm.name));
       const accountTypeMatch =
         selectedAccountTypes.length === 0 ||
         selectedAccountTypes.includes(firm.accountType);
@@ -818,6 +837,7 @@ export default function ComparePage() {
     selectedFirmNames,
     selectedPlatforms,
     selectedScoreTiers,
+    selectedFirmNames,
     selectedSizes,
     sortDir,
     sortKey,
