@@ -125,7 +125,7 @@ const apexBase = {
   isSponsored: true,
   rules: apexRules,
   promoExpiry: "-",
-  paymentPlan: "one_time" as const,
+  paymentPlan: "subscription" as const,
 };
 
 /** Max drawdown caps TopStep â€” Ã  aligner sur les rÃ¨gles officielles. */
@@ -196,7 +196,7 @@ const bulenoxBase = {
   isSponsored: false,
   rules: bulenoxRulesBase,
   promoExpiry: "-",
-  paymentPlan: "subscription" as const,
+  paymentPlan: "one_time" as const,
 };
 
 const tptRulesBase: AccountRulesBrief = {
@@ -343,7 +343,7 @@ const lucidBase = {
   isSponsored: false,
   rules: lucidRulesBase,
   discountTooltipFooter: "Expires May 17, 2026",
-  paymentPlan: "subscription" as const,
+  paymentPlan: "one_time" as const,
 };
 
 const mffRulesBase: AccountRulesBrief = {
