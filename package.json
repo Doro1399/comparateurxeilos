@@ -21,6 +21,7 @@
     "gen:mffu-pro": "node scripts/generate-mffu-pro-sim-funded-from-csv.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "autoprefixer": "^10.4.27",
     "html-to-image": "^1.11.13",
     "next": "16.2.1",
